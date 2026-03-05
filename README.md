@@ -1,77 +1,141 @@
-# MLOps-StockPricePrediction
+# 📈 MLOps-StockPricePrediction
 
-Sistem MLOps untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
+> Sistem MLOps untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
 
-**Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2025
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
----
-
-## Tech Stack
-- Python 3.11 | scikit-learn | pandas | numpy
-- FastAPI (REST API serving)
-- MLflow (experiment tracking & model registry)
-- Evidently AI (drift detection)
-- GitHub Codespaces (reproducible dev environment)
-- Yahoo Finance API (data source)
+**Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2025  
+**Nama:** Rafly Januar Raharjo | **NIM:** 235150201111011
 
 ---
 
-## Struktur Direktori
+## 📌 Deskripsi Proyek
+
+Proyek ini membangun sistem Machine Learning production-ready untuk prediksi harga penutupan saham AAPL (T+1) berbasis prinsip MLOps. Sistem dirancang dengan mekanisme **Continuous Training** untuk menjaga relevansi model terhadap perubahan pola pasar.
+
+---
+
+## 🛠️ Tech Stack
+
+| Komponen | Teknologi |
+|----------|-----------|
+| Language | Python 3.11 |
+| ML Model | scikit-learn (Random Forest) |
+| Data Source | Yahoo Finance API (yfinance) |
+| API Backend | FastAPI |
+| Frontend | HTML + CSS + JavaScript |
+| Experiment Tracking | MLflow |
+| Drift Detection | Evidently AI |
+| Dev Environment | GitHub Codespaces |
+
+---
+
+## 📁 Struktur Direktori
 ```
 MLOps-StockPricePrediction/
-├── .devcontainer/        # Konfigurasi GitHub Codespaces
-├── .github/workflows/    # CI/CD pipelines
-├── config/               # Konfigurasi sistem
+├── .devcontainer/            # Konfigurasi GitHub Codespaces
+│   └── devcontainer.json
+├── .github/
+│   └── workflows/            # CI/CD pipelines
+├── config/                   # Konfigurasi sistem & hyperparameter
 ├── data/
-│   ├── raw/              # Data mentah dari Yahoo Finance
-│   ├── processed/        # Data hasil feature engineering
-│   └── external/         # Data eksternal
-├── docs/                 # Dokumentasi teknis
+│   ├── raw/                  # Data mentah dari Yahoo Finance
+│   ├── processed/            # Data hasil feature engineering
+│   └── external/             # Data eksternal (indeks makro)
+├── docs/                     # Dokumentasi teknis
 ├── models/
-│   ├── registry/         # Versioned model artifacts
-│   └── experiments/      # Model eksperimen
-├── notebooks/            # Jupyter notebooks
+│   ├── registry/             # Versioned model artifacts (.pkl)
+│   └── experiments/          # Model dari eksperimen
+├── notebooks/
+│   └── 01_eda.ipynb          # Exploratory Data Analysis AAPL
 ├── src/
-│   ├── data/             # Data ingestion
-│   ├── features/         # Feature engineering
-│   ├── models/           # Training & evaluasi
-│   ├── monitoring/       # Drift detection
-│   └── api/              # REST API (FastAPI)
-└── tests/                # Unit & integration tests
+│   ├── data/                 # Data ingestion & preprocessing
+│   ├── features/             # Feature engineering (MA, RSI, MACD)
+│   ├── models/               # Training & evaluasi Random Forest
+│   ├── monitoring/           # Drift detection & retraining trigger
+│   └── api/
+│       ├── static/
+│       │   ├── css/          # Styling web prediksi
+│       │   └── js/           # Logic frontend & chart
+│       ├── templates/        # HTML halaman prediksi
+│       └── main.py           # FastAPI backend
+├── tests/                    # Unit & integration tests
+├── requirements.txt          # Python dependencies
+└── README.md
 ```
 
 ---
 
-## Cara Menjalankan via GitHub Codespaces
-1. Klik tombol **Code** (hijau) di halaman repo
-2. Pilih tab **Codespaces**
-3. Klik **Create codespace on main**
-4. Tunggu setup otomatis ~2-3 menit
-5. Environment siap digunakan!
+## 🚀 Cara Menjalankan via GitHub Codespaces
 
-## Cara Menjalankan Lokal
+1. Klik tombol **"Code"** (hijau) di halaman repo
+2. Pilih tab **"Codespaces"**
+3. Klik **"Create codespace on main"**
+4. Tunggu setup otomatis ±2-3 menit
+5. Semua dependensi terinstall otomatis via `requirements.txt`
+6. Environment siap digunakan!
+
+---
+
+## 💻 Cara Menjalankan Lokal
 ```bash
+# 1. Clone repositori
 git clone https://github.com/RaflyJanuarRaharjo/MLOps-StockPricePrediction.git
 cd MLOps-StockPricePrediction
+
+# 2. Buat virtual environment
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # Mac/Linux
+
+# 3. Install dependensi
 pip install -r requirements.txt
+
+# 4. Jalankan API
+uvicorn src.api.main:app --reload
 ```
 
 ---
 
-## Branching Strategy (GitHub Flow)
-- `main` - branch utama, selalu stable
-- `feat/*` - branch untuk fitur baru / eksperimen
-- `fix/*` - branch untuk perbaikan bug
-- Setiap perubahan wajib melalui **Pull Request** sebelum merge ke main
+## 🌿 Branching Strategy (GitHub Flow)
+```
+main
+ └── feat/initial-eda        ✅ merged
+ └── feat/data-ingestion     (upcoming)
+ └── feat/feature-engineering (upcoming)
+ └── feat/model-training     (upcoming)
+```
+
+- `main` → branch utama, selalu stable & deployable
+- `feat/*` → branch untuk fitur baru / eksperimen
+- `fix/*` → branch untuk perbaikan bug
+- Setiap perubahan wajib melalui **Pull Request** sebelum merge ke `main`
 
 ---
 
-## Kriteria Keberhasilan
+## 📊 Kriteria Keberhasilan
+
 | Metrik | Target |
 |--------|--------|
 | RMSE | Serendah mungkin, konsisten antar periode |
-| MAE | < 2% dari rata-rata harga |
+| MAE | < 2% dari rata-rata harga AAPL |
 | Uptime sistem | > 95% |
 | Drift detection | Retraining otomatis jika RMSE naik > 10% |
+
+---
+
+## 🔄 Alur Sistem MLOps
+```
+Yahoo Finance API → Data Ingestion → Feature Engineering
+       → Model Training (Random Forest) → Model Registry
+       → REST API (FastAPI) → Web Dashboard (HTML/CSS)
+       → Monitoring & Drift Detection → Auto Retraining
+```
+
+---
+
+## 📄 Lisensi
+
+MIT License - lihat file [LICENSE](LICENSE) untuk detail.
