@@ -115,8 +115,3 @@ Yahoo Finance API → Data Ingestion → Feature Engineering
        → Monitoring & Drift Detection → Auto Retraining
 ```
 
----
-
-## 📄 Lisensi
-
-MIT License - lihat file [LICENSE](LICENSE) untuk detail.
