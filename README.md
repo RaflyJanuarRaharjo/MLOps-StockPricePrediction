@@ -66,55 +66,6 @@ MLOps-StockPricePrediction/
 └── README.md
 ```
 
----
-
-## 🚀 Cara Menjalankan via GitHub Codespaces
-
-1. Klik tombol **"Code"** (hijau) di halaman repo
-2. Pilih tab **"Codespaces"**
-3. Klik **"Create codespace on main"**
-4. Tunggu setup otomatis ±2-3 menit
-5. Semua dependensi terinstall otomatis via `requirements.txt`
-6. Environment siap digunakan!
-
----
-
-## 💻 Cara Menjalankan Lokal
-```bash
-# 1. Clone repositori
-git clone https://github.com/RaflyJanuarRaharjo/MLOps-StockPricePrediction.git
-cd MLOps-StockPricePrediction
-
-# 2. Buat virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-source .venv/bin/activate     # Mac/Linux
-
-# 3. Install dependensi
-pip install -r requirements.txt
-
-# 4. Jalankan API
-uvicorn src.api.main:app --reload
-```
-
----
-
-## 🌿 Branching Strategy (GitHub Flow)
-```
-main
- └── feat/initial-eda        ✅ merged
- └── feat/data-ingestion     (upcoming)
- └── feat/feature-engineering (upcoming)
- └── feat/model-training     (upcoming)
-```
-
-- `main` → branch utama, selalu stable & deployable
-- `feat/*` → branch untuk fitur baru / eksperimen
-- `fix/*` → branch untuk perbaikan bug
-- Setiap perubahan wajib melalui **Pull Request** sebelum merge ke `main`
-
----
-
 ## 📊 Kriteria Keberhasilan
 
 | Metrik | Target |
