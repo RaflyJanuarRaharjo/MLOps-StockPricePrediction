@@ -95,23 +95,6 @@ pip install -r requirements.txt
 uvicorn src.api.main:app --reload
 ```
 
----
-
-## 🌿 Branching Strategy (GitHub Flow)
-```
-main
- └── feat/initial-eda        ✅ merged
- └── feat/data-ingestion     (upcoming)
- └── feat/feature-engineering (upcoming)
- └── feat/model-training     (upcoming)
-```
-
-- `main` → branch utama, selalu stable & deployable
-- `feat/*` → branch untuk fitur baru / eksperimen
-- `fix/*` → branch untuk perbaikan bug
-- Setiap perubahan wajib melalui **Pull Request** sebelum merge ke `main`
-
----
 
 ## 📊 Kriteria Keberhasilan
 
