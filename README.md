@@ -3,8 +3,6 @@
 > Sistem MLOps untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
 **Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2025  
 **Nama:** Rafly Januar Raharjo | **NIM:** 235150201111011
