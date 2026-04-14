@@ -1,0 +1,5 @@
+outs:
+- md5: f66063adfa66a95b3576dd82cb821a66
+  size: 23615
+  hash: md5
+  path: aapl_raw_20260331_170609.csv
