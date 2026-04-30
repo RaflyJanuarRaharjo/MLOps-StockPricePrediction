@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/1aabba23e9e34c77942bcaf668976276/artifacts
+end_time: 1776842157644
+entry_point_name: ''
+experiment_id: '203552422856984604'
+lifecycle_stage: active
+run_id: 1aabba23e9e34c77942bcaf668976276
+run_name: RF-Shallow-Trees
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776842148254
+status: 3
+tags: []
+user_id: IDEAPAD

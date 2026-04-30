@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/1c1ab4a744114deb82ad8d3dbd4d0441/artifacts
+end_time: 1776842139009
+entry_point_name: ''
+experiment_id: '203552422856984604'
+lifecycle_stage: active
+run_id: 1c1ab4a744114deb82ad8d3dbd4d0441
+run_name: RF-Baseline
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1776842118013
+status: 3
+tags: []
+user_id: IDEAPAD

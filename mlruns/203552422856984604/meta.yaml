@@ -1,0 +1,8 @@
+artifact_location: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604
+creation_time: 1776842117417
+experiment_id: '203552422856984604'
+last_update_time: 1776842117417
+lifecycle_stage: active
+name: AAPL-RandomForest
+trace_location: null
+workspace: default

@@ -1,0 +1,29 @@
+artifact_path: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/models/m-515200060a3348bc8247f6351ab330cb/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.12
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+is_signature_from_type_hint: false
+mlflow_version: 3.11.1
+model_id: m-515200060a3348bc8247f6351ab330cb
+model_size_bytes: 1610808
+model_uuid: m-515200060a3348bc8247f6351ab330cb
+prompts: null
+run_id: 1c1ab4a744114deb82ad8d3dbd4d0441
+signature:
+  inputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1, 19]}}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-04-22 07:15:18.788694'

@@ -1,0 +1,8 @@
+artifact_location: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/0
+creation_time: 1776842117386
+experiment_id: '0'
+last_update_time: 1776842117386
+lifecycle_stage: active
+name: Default
+trace_location: null
+workspace: default

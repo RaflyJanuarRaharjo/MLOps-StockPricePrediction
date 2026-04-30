@@ -1,0 +1,10 @@
+artifact_location: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/models/m-515200060a3348bc8247f6351ab330cb/artifacts
+creation_timestamp: 1776842118651
+experiment_id: '203552422856984604'
+last_updated_timestamp: 1776842138685
+model_id: m-515200060a3348bc8247f6351ab330cb
+model_type: null
+name: random_forest_model
+source_run_id: 1c1ab4a744114deb82ad8d3dbd4d0441
+status: 2
+status_message: null

@@ -1,0 +1,16 @@
+creation_timestamp: 1776842157373
+current_stage: None
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1776842157373
+model_id: m-65d9bf6ded574e9b8df14d67ed4045be
+name: AAPL-RF-RF-Shallow-Trees
+run_id: 1aabba23e9e34c77942bcaf668976276
+run_link: null
+source: models:/m-65d9bf6ded574e9b8df14d67ed4045be
+status: READY
+status_message: null
+storage_location: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/models/m-65d9bf6ded574e9b8df14d67ed4045be/artifacts
+user_id: null
+version: 1
+workspace: default

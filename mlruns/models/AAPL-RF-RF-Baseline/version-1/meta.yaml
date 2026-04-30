@@ -1,0 +1,16 @@
+creation_timestamp: 1776842138770
+current_stage: None
+deployment_job_state: null
+description: null
+last_updated_timestamp: 1776842138770
+model_id: m-515200060a3348bc8247f6351ab330cb
+name: AAPL-RF-RF-Baseline
+run_id: 1c1ab4a744114deb82ad8d3dbd4d0441
+run_link: null
+source: models:/m-515200060a3348bc8247f6351ab330cb
+status: READY
+status_message: null
+storage_location: file:C:/Kuliah/MLOPS/MLOps-StockPricePrediction/mlruns/203552422856984604/models/m-515200060a3348bc8247f6351ab330cb/artifacts
+user_id: null
+version: 1
+workspace: default
