@@ -1,36 +1,37 @@
 # 📈 MLOps-StockPricePrediction
 
-> Sistem MLOps untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training** dan **Data Versioning (DVC)**.
+> Sistem MLOps end-to-end untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
+![MLflow](https://img.shields.io/badge/MLflow-3.11.1-orange)
+![DVC](https://img.shields.io/badge/DVC-enabled-green)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-automated-brightgreen)
 
-**Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2025
+**Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2026  
 **Nama:** Rafly Januar Raharjo | **NIM:** 235150201111011
 
 ---
 
 ## 📌 Deskripsi Proyek
 
-Proyek ini membangun sistem Machine Learning production-ready untuk prediksi harga penutupan saham AAPL (T+1) berbasis prinsip MLOps. Sistem dirancang dengan mekanisme:
-
-* **Continuous Training** untuk adaptasi terhadap perubahan pasar
-* **Data Versioning menggunakan DVC** untuk melacak perubahan dataset secara efisien
+Proyek ini membangun sistem Machine Learning production-ready untuk prediksi harga penutupan saham AAPL (T+1) berbasis prinsip MLOps. Sistem mencakup pipeline data otomatis, versioning dataset, experiment tracking, model registry, dan inferensi production.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Komponen            | Teknologi                    |
-| ------------------- | ---------------------------- |
-| Language            | Python 3.11                  |
-| ML Model            | scikit-learn (Random Forest) |
-| Data Source         | Yahoo Finance API (yfinance) |
-| API Backend         | FastAPI                      |
-| Frontend            | HTML + CSS + JavaScript      |
-| Experiment Tracking | MLflow                       |
-| Drift Detection     | Evidently AI                 |
-| Data Versioning     | DVC                          |
-| Dev Environment     | GitHub Codespaces            |
+| Komponen | Teknologi |
+|----------|-----------|
+| Language | Python 3.11 |
+| ML Model | scikit-learn (Random Forest Regressor) |
+| Data Source | Yahoo Finance API (yfinance) |
+| API Backend | FastAPI |
+| Frontend | HTML + CSS + JavaScript |
+| Experiment Tracking | MLflow 3.11.1 |
+| Drift Detection | Evidently AI |
+| Data Versioning | DVC |
+| Automation | GitHub Actions |
+| Dev Environment | GitHub Codespaces |
 
 ---
 
@@ -38,147 +39,196 @@ Proyek ini membangun sistem Machine Learning production-ready untuk prediksi har
 
 ```
 MLOps-StockPricePrediction/
+├── .github/
+│   └── workflows/
+│       └── daily_ingestion.yml   # Automasi harian GitHub Actions
+├── .dvc/                         # Konfigurasi DVC
 ├── data/
-│   └── raw/
-│       ├── aapl_raw_20260331_170609.csv
-│       ├── aapl_raw_20260331_170609.csv.dvc
-│       └── .gitignore
+│   ├── raw/                      # Data mentah dari Yahoo Finance
+│   │   ├── aapl_raw_*.csv        # File data OHLCV
+│   │   └── aapl_raw_*.csv.dvc    # DVC metadata
+│   ├── processed/                # Data hasil feature engineering
+│   │   └── aapl_features_*_v1.0.0.csv
+│   └── external/                 # Data eksternal (indeks makro)
+├── models/
+│   └── registry/                 # Model artifacts (.pkl)
 ├── src/
-│   └── data/
-│       └── ingest_data.py
-├── .dvc/
-├── .gitignore
-├── requirements.txt
+│   ├── data/
+│   │   ├── ingest_data.py        # Script pengambilan data
+│   │   ├── preprocess.py         # Script preprocessing
+│   │   ├── pipeline.py           # Main ETL runner
+│   │   └── scheduler.py          # Scheduler harian
+│   ├── features/
+│   │   └── feature_eng.py        # Feature engineering
+│   └── models/
+│       └── train.py              # Training + MLflow logging
+├── mlflow.db                     # MLflow SQLite backend
+├── registry.py                   # Model registry management
+├── inference.py                  # Verifikasi inferensi
 └── README.md
 ```
 
 ---
 
-## ⚙️ Inisialisasi DVC
+## 🚀 Cara Menjalankan
 
+### 1. Clone Repositori
 ```bash
-dvc init
-git add .dvc .gitignore
-git commit -m "init: initialize DVC"
+git clone https://github.com/RaflyJanuarRaharjo/MLOps-StockPricePrediction.git
+cd MLOps-StockPricePrediction
+```
+
+### 2. Install Dependencies
+```bash
+pip install yfinance pandas numpy mlflow scikit-learn dvc
+```
+
+### 3. Jalankan ETL Pipeline
+```bash
+python src/data/ingest_data.py
+python src/data/preprocess.py
+```
+
+### 4. Training Model dengan MLflow
+```bash
+python src/models/train.py
+```
+
+### 5. Buka MLflow UI
+```bash
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+# Buka browser: http://127.0.0.1:5000
+```
+
+### 6. Inferensi Model Production
+```bash
+python inference.py
+```
+
+---
+
+## 🔄 Pipeline Data (ETL)
+
+```
+Yahoo Finance API
+      ↓ (ingest_data.py)
+data/raw/aapl_raw_{timestamp}.csv
+      ↓ (preprocess.py)
+data/processed/aapl_features_{timestamp}_v1.0.0.csv
+      ↓ (train.py)
+MLflow Experiment → Model Registry → Production
 ```
 
 ---
 
 ## 📦 Data Versioning dengan DVC
 
-### 🔹 Versi Awal Dataset (v1.0.0)
-
-```bash
-python src/data/ingest_data.py
-
-dvc add data/raw/aapl_raw_20260331_170609.csv
-git add data/raw/aapl_raw_20260331_170609.csv.dvc data/raw/.gitignore
-git commit -m "data(v1.0.0): track initial dataset"
-```
-
----
-
-### 🔄 Continual Learning (Update Dataset v1.1.0)
-
-Data diperbarui dengan ingestion ulang:
-
-```bash
-python src/data/ingest_data.py
-```
-
-Karena file baru dihasilkan, dilakukan overwrite untuk menjaga versioning:
-
-```bash
-move data/raw/aapl_raw_20260414_*.csv data/raw/aapl_raw_20260331_170609.csv
-```
-
-Tracking ulang dengan DVC:
-
+### Track dataset awal
 ```bash
 dvc add data/raw/aapl_raw_20260331_170609.csv
 git add data/raw/aapl_raw_20260331_170609.csv.dvc
+git commit -m "data(v1.0.0): track initial dataset"
+git tag data-v1.0.0
+```
+
+### Update dataset (Continual Learning)
+```bash
+python src/data/ingest_data.py
+dvc add data/raw/aapl_raw_20260331_170609.csv
+git add data/raw/aapl_raw_20260331_170609.csv.dvc
 git commit -m "data(v1.1.0): update dataset"
+git tag data-v1.1.0
 ```
 
----
-
-## 🔍 Audit Perubahan Data
-
-Melihat perbedaan antar versi dataset:
-
+### Lihat perubahan antar versi
 ```bash
-dvc diff
-```
-
-Output menunjukkan:
-
-* perubahan hash dataset
-* perubahan ukuran file
-
-Hal ini membuktikan bahwa DVC melacak perubahan tanpa menyimpan file besar di Git.
-
----
-
-## 💡 Konsep MLOps yang Diterapkan
-
-* Data Versioning (DVC)
-* Continuous Training
-* Reproducibility
-* Separation of Code & Data
-* Monitoring & Drift Detection
-
----
-
-## 🚀 Cara Menjalankan
-
-### 💻 Lokal
-
-```bash
-git clone https://github.com/RaflyJanuarRaharjo/MLOps-StockPricePrediction.git
-cd MLOps-StockPricePrediction
-
-python -m venv .venv
-.venv\Scripts\activate
-
-pip install -r requirements.txt
-uvicorn src.api.main:app --reload
+dvc diff HEAD~1 HEAD
 ```
 
 ---
 
-## ☁️ (Opsional) DVC Remote Storage
+## 🧪 MLflow Experiment Tracking
 
-```bash
-dvc remote add -d myremote ../dvc-storage
-dvc push
+| Run Name | n_estimators | max_depth | RMSE | R² |
+|----------|-------------|-----------|------|-----|
+| RF-Baseline | 100 | None | 4.8743 | 0.6901 |
+| RF-Deep-Trees | 200 | 20 | 4.8370 | 0.6948 |
+| **RF-Shallow-Trees** ⭐ | **300** | **10** | **4.5852** | **0.7257** |
+
+---
+
+## 🏆 Model Registry & Versi Aktif
+
+| Model Name | Version | Stage | RMSE |
+|------------|---------|-------|------|
+| AAPL-RF-RF-Baseline | v1 | None | 4.8743 |
+| AAPL-RF-RF-Deep-Trees | v1 | None | 4.8370 |
+| AAPL-RF-RF-Shallow-Trees | v1 | None | 4.5852 |
+| **AAPL-RF-Production** | **v1** | **Production** ✅ | **4.6109** |
+
+### ✅ Model Aktif untuk Inferensi
+
+**Model:** `AAPL-RF-Production` — **Version 1** — **Alias: @production**
+
+**Alasan dipilih:**
+- RMSE = 4.6109 (error prediksi rata-rata ±$4.61)
+- R² = 0.7227 (menjelaskan 72% variansi harga AAPL)
+- MAPE = 1.3253% (error persentase sangat rendah)
+- Parameter: n_estimators=500, max_depth=8, min_samples_split=12
+
+### Load model Production
+```python
+import mlflow
+mlflow.set_tracking_uri('sqlite:///mlflow.db')
+model = mlflow.pyfunc.load_model('models:/AAPL-RF-Production@production')
+predictions = model.predict(X)
 ```
 
 ---
 
-## 📊 Alur Sistem MLOps
+## ⚙️ Automasi Harian (GitHub Actions)
+
+Pipeline data berjalan otomatis setiap hari kerja **pukul 04:00 WIB**:
 
 ```
-Yahoo Finance API → Data Ingestion → Data Versioning (DVC)
-       → Feature Engineering → Model Training
-       → Model Registry → API (FastAPI)
-       → Monitoring → Retraining
+Setiap Senin–Jumat 04:00 WIB
+        ↓
+GitHub Actions (daily_ingestion.yml)
+        ↓
+python src/data/ingest_data.py
+        ↓
+python src/data/preprocess.py
+        ↓
+git commit + push ke main
 ```
+
+Jalankan manual: tab **Actions** di GitHub → **"Daily Data Ingestion"** → **"Run workflow"**
 
 ---
 
-## 📈 Insight
+## 📊 Fitur Teknikal (19 Fitur)
 
-Dengan DVC, dataset besar tidak disimpan langsung di Git, melainkan sebagai metadata (.dvc).
-Setiap perubahan data menghasilkan hash baru, sehingga histori dataset dapat dilacak dengan jelas dan reproducible.
+| Kategori | Fitur |
+|----------|-------|
+| OHLCV | Open, High, Low, Close, Volume |
+| Moving Average | MA_7, MA_14, MA_30 |
+| Momentum | RSI_14, MACD, Signal, Hist |
+| Volatilitas | BB_upper, BB_lower |
+| Return | Daily_Return |
+| Lag | Close_lag1, Close_lag2, Close_lag5 |
+| Volume | Vol_MA_7 |
+| **Target** | **Close T+1** |
 
 ---
 
-## ✅ Kesimpulan
+## ✅ Status Implementasi
 
-Proyek ini berhasil mengimplementasikan:
-
-* Versioning dataset menggunakan DVC
-* Simulasi continual learning
-* Audit perubahan data antar versi
-
-Sehingga mendukung praktik MLOps yang scalable, efisien, dan production-ready.
+| LK | Komponen | Status |
+|----|----------|--------|
+| LK-2 | GitHub Repository + Codespaces | ✅ |
+| LK-3 | Rancangan Pipeline ETL + Diagram | ✅ |
+| LK-4 | ingest_data.py + preprocess.py | ✅ |
+| LK-5 | DVC Data Versioning | ✅ |
+| LK-6 | MLflow Experiment Tracking | ✅ |
+| LK-7 | Model Registry + Inferensi Production | ✅ |
+| Bonus | GitHub Actions Automasi Harian | ✅ |
