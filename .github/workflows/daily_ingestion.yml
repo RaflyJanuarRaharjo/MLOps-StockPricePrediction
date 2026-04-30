@@ -2,55 +2,46 @@ name: Daily Data Ingestion - AAPL Stock Price
 
 on:
   schedule:
-    # Setiap hari kerja jam 21:00 UTC = 04:00 WIB
     - cron: '0 21 * * 1-5'
-  
-  # Bisa dijalankan manual dari GitHub
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   ingest-and-preprocess:
     runs-on: ubuntu-latest
-    
+
     steps:
-      # 1. Checkout repo
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Setup Python
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # 3. Install dependencies
       - name: Install Dependencies
         run: |
           pip install yfinance pandas numpy
 
-      # 4. Buat folder jika belum ada
       - name: Create Data Folders
         run: |
           mkdir -p data/raw
           mkdir -p data/processed
 
-      # 5. Jalankan ingestion
       - name: Run Data Ingestion
         run: |
           python src/data/ingest_data.py
 
-      # 6. Jalankan preprocessing
       - name: Run Preprocessing
         run: |
           python src/data/preprocess.py
 
-      # 7. Commit dan push data baru
       - name: Commit New Data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/raw/ data/processed/
+          git add data/raw/*.csv data/processed/*.csv 2>/dev/null || true
           git diff --staged --quiet || git commit -m "data: auto-ingest AAPL $(date +'%Y-%m-%d') [skip ci]"
-          git push
+          git push || echo "Nothing to push"
