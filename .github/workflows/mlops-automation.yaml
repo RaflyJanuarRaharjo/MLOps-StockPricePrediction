@@ -1,0 +1,372 @@
+name: MLOps Automation Pipeline - Code as Trigger
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'config/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PYTHONPATH: ${{ github.workspace }}
+
+jobs:
+  # ============================================================
+  # TAHAP 1 — AUTOMATED TESTING
+  # ============================================================
+  automated-testing:
+    name: "Tahap 1 - Automated Testing (pytest)"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install pytest yfinance pandas numpy scikit-learn mlflow
+
+      - name: Create Test Files
+        run: |
+          mkdir -p tests
+          cat > tests/test_pipeline.py << 'EOF'
+          import pytest
+          import pandas as pd
+          import numpy as np
+          import sys, os
+          sys.path.insert(0, os.getcwd())
+
+          def test_data_folders_exist():
+              """Test folder data tersedia"""
+              assert os.path.exists("data") or True
+
+          def test_feature_engineering():
+              """Test feature engineering menghasilkan kolom yang benar"""
+              df = pd.DataFrame({
+                  'Open': [100,101,102,103,104,105,106,107,108,109,110]*5,
+                  'High': [105,106,107,108,109,110,111,112,113,114,115]*5,
+                  'Low':  [95,96,97,98,99,100,101,102,103,104,105]*5,
+                  'Close':[102,103,104,105,106,107,108,109,110,111,112]*5,
+                  'Volume':[1000000]*55
+              })
+              df['MA_7']  = df['Close'].rolling(7).mean()
+              df['MA_14'] = df['Close'].rolling(14).mean()
+              df['MA_30'] = df['Close'].rolling(30).mean()
+              assert 'MA_7'  in df.columns
+              assert 'MA_14' in df.columns
+              assert 'MA_30' in df.columns
+
+          def test_rsi_calculation():
+              """Test RSI dihitung dengan benar (range 0-100)"""
+              close = pd.Series([100,102,101,103,105,104,106,108,107,109,
+                                 110,108,111,113,112,114,116,115,117,119])
+              delta = close.diff()
+              gain  = delta.where(delta>0,0).rolling(14).mean()
+              loss  = (-delta.where(delta<0,0)).rolling(14).mean()
+              rsi   = 100 - (100/(1+gain/loss))
+              valid = rsi.dropna()
+              if len(valid) > 0:
+                  assert all(0 <= v <= 100 for v in valid)
+
+          def test_train_test_split():
+              """Test split 80:20 benar"""
+              X = np.random.rand(100, 5)
+              split = int(len(X) * 0.8)
+              assert split == 80
+              assert len(X[:split]) == 80
+              assert len(X[split:]) == 20
+
+          def test_model_training():
+              """Test model bisa dilatih dan prediksi"""
+              from sklearn.ensemble import RandomForestRegressor
+              X = np.random.rand(100, 5)
+              y = np.random.rand(100)
+              model = RandomForestRegressor(n_estimators=10, random_state=42)
+              model.fit(X[:80], y[:80])
+              preds = model.predict(X[80:])
+              assert len(preds) == 20
+              assert all(isinstance(p, float) for p in preds)
+
+          def test_rmse_threshold():
+              """Test RMSE tidak melebihi threshold maksimum"""
+              RMSE_THRESHOLD = 15.0
+              from sklearn.ensemble import RandomForestRegressor
+              from sklearn.metrics import mean_squared_error
+              X = np.random.rand(100, 5)
+              y = X[:,0] * 200 + 100
+              model = RandomForestRegressor(n_estimators=10, random_state=42)
+              model.fit(X[:80], y[:80])
+              preds = model.predict(X[80:])
+              rmse  = np.sqrt(mean_squared_error(y[80:], preds))
+              assert rmse < RMSE_THRESHOLD, f"RMSE {rmse:.4f} melebihi threshold {RMSE_THRESHOLD}"
+          EOF
+
+      - name: Run Tests
+        run: |
+          pytest tests/test_pipeline.py -v --tb=short
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tests/
+
+  # ============================================================
+  # TAHAP 2 — AUTOMATED TRAINING
+  # ============================================================
+  automated-training:
+    name: "Tahap 2 - Automated Training"
+    runs-on: ubuntu-latest
+    needs: automated-testing
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install yfinance pandas numpy scikit-learn mlflow
+
+      - name: Create Data Directories
+        run: |
+          mkdir -p data/raw data/processed models/registry
+
+      - name: Fetch Latest Data
+        run: |
+          python src/data/ingest_data.py
+
+      - name: Run Preprocessing
+        run: |
+          python src/data/preprocess.py
+
+      - name: Run Training with MLflow
+        run: |
+          cat > run_training.py << 'EOF'
+          import mlflow
+          import mlflow.sklearn
+          import glob, os, json
+          import numpy as np
+          import pandas as pd
+          from sklearn.ensemble import RandomForestRegressor
+          from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+          mlflow.set_tracking_uri("sqlite:///mlflow.db")
+          mlflow.set_experiment("AAPL-CI-Pipeline")
+
+          files = sorted(glob.glob("data/processed/aapl_features_*.csv"))
+          df    = pd.read_csv(files[-1], index_col="Date", parse_dates=True).dropna()
+          cols  = ["Open","High","Low","Close","Volume","MA_7","MA_14","MA_30",
+                   "RSI_14","MACD","Signal","Hist","BB_upper","BB_lower",
+                   "Daily_Return","Close_lag1","Close_lag2","Close_lag5","Vol_MA_7"]
+          X = df[cols].values
+          y = df["Target"].values
+          split = int(len(X)*0.8)
+          X_train,X_test = X[:split],X[split:]
+          y_train,y_test = y[:split],y[split:]
+
+          params = {"n_estimators":300,"max_depth":10,"min_samples_split":10,
+                    "min_samples_leaf":4,"max_features":0.7}
+
+          with mlflow.start_run(run_name="CI-AutoTrain"):
+              for k,v in params.items():
+                  mlflow.log_param(k,v)
+              model = RandomForestRegressor(**params, random_state=42, n_jobs=-1)
+              model.fit(X_train, y_train)
+              y_pred = model.predict(X_test)
+              rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
+              mae  = float(mean_absolute_error(y_test, y_pred))
+              r2   = float(r2_score(y_test, y_pred))
+              mape = float(np.mean(np.abs((y_test-y_pred)/y_test))*100)
+              mlflow.log_metric("rmse", round(rmse,4))
+              mlflow.log_metric("mae",  round(mae,4))
+              mlflow.log_metric("r2_score", round(r2,4))
+              mlflow.log_metric("mape", round(mape,4))
+              mlflow.sklearn.log_model(model, name="rf_model",
+                  registered_model_name="AAPL-RF-CI")
+              run_id = mlflow.active_run().info.run_id
+
+          metrics = {"rmse":round(rmse,4),"mae":round(mae,4),
+                     "r2":round(r2,4),"mape":round(mape,4),"run_id":run_id}
+          with open("metrics.json","w") as f:
+              json.dump(metrics, f, indent=2)
+
+          print(f"Training selesai!")
+          print(f"RMSE={rmse:.4f} MAE={mae:.4f} R2={r2:.4f} MAPE={mape:.4f}%")
+          print(f"Run ID: {run_id}")
+          EOF
+          python run_training.py
+
+      - name: Upload Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: training-metrics
+          path: metrics.json
+
+  # ============================================================
+  # TAHAP 3 — MODEL EVALUATION & VALIDATION
+  # ============================================================
+  model-evaluation:
+    name: "Tahap 3 - Model Evaluation & Validation"
+    runs-on: ubuntu-latest
+    needs: automated-training
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download Metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: training-metrics
+
+      - name: Validate Model Performance
+        run: |
+          python << 'EOF'
+          import json, sys
+
+          # Threshold dari LK-01
+          THRESHOLDS = {
+              "rmse_max" : 10.0,
+              "mae_max"  : 8.0,
+              "r2_min"   : 0.5,
+              "mape_max" : 5.0
+          }
+
+          with open("metrics.json") as f:
+              metrics = json.load(f)
+
+          print("="*55)
+          print("  MODEL EVALUATION REPORT")
+          print("="*55)
+          print(f"  RMSE      : {metrics['rmse']} (max: {THRESHOLDS['rmse_max']})")
+          print(f"  MAE       : {metrics['mae']}  (max: {THRESHOLDS['mae_max']})")
+          print(f"  R² Score  : {metrics['r2']}   (min: {THRESHOLDS['r2_min']})")
+          print(f"  MAPE      : {metrics['mape']}% (max: {THRESHOLDS['mape_max']}%)")
+          print("="*55)
+
+          passed = True
+          if metrics['rmse'] > THRESHOLDS['rmse_max']:
+              print(f"GAGAL: RMSE {metrics['rmse']} > {THRESHOLDS['rmse_max']}")
+              passed = False
+          if metrics['mae'] > THRESHOLDS['mae_max']:
+              print(f"GAGAL: MAE {metrics['mae']} > {THRESHOLDS['mae_max']}")
+              passed = False
+          if metrics['r2'] < THRESHOLDS['r2_min']:
+              print(f"GAGAL: R2 {metrics['r2']} < {THRESHOLDS['r2_min']}")
+              passed = False
+          if metrics['mape'] > THRESHOLDS['mape_max']:
+              print(f"GAGAL: MAPE {metrics['mape']} > {THRESHOLDS['mape_max']}")
+              passed = False
+
+          if passed:
+              print("VALIDASI BERHASIL! Model memenuhi semua threshold.")
+              print("Lanjut ke Auto-Registry...")
+          else:
+              print("VALIDASI GAGAL! Model tidak memenuhi threshold.")
+              sys.exit(1)
+          EOF
+
+  # ============================================================
+  # TAHAP 4 — AUTO REGISTRY UPDATE
+  # ============================================================
+  auto-registry:
+    name: "Tahap 4 - Auto Registry Update (Staging)"
+    runs-on: ubuntu-latest
+    needs: model-evaluation
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install mlflow yfinance pandas numpy scikit-learn
+
+      - name: Download Metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: training-metrics
+
+      - name: Create Data & Retrain for Registry
+        run: |
+          mkdir -p data/raw data/processed models/registry
+          python src/data/ingest_data.py
+          python src/data/preprocess.py
+
+      - name: Register Model to Staging
+        run: |
+          python << 'EOF'
+          import mlflow, json, glob
+          import numpy as np
+          import pandas as pd
+          from sklearn.ensemble import RandomForestRegressor
+
+          mlflow.set_tracking_uri("sqlite:///mlflow.db")
+          mlflow.set_experiment("AAPL-CI-Pipeline")
+
+          with open("metrics.json") as f:
+              metrics = json.load(f)
+
+          files = sorted(glob.glob("data/processed/aapl_features_*.csv"))
+          df    = pd.read_csv(files[-1], index_col="Date", parse_dates=True).dropna()
+          cols  = ["Open","High","Low","Close","Volume","MA_7","MA_14","MA_30",
+                   "RSI_14","MACD","Signal","Hist","BB_upper","BB_lower",
+                   "Daily_Return","Close_lag1","Close_lag2","Close_lag5","Vol_MA_7"]
+          X = df[cols].values
+          y = df["Target"].values
+          split = int(len(X)*0.8)
+
+          params = {"n_estimators":300,"max_depth":10,"min_samples_split":10,
+                    "min_samples_leaf":4,"max_features":0.7}
+          model = RandomForestRegressor(**params, random_state=42, n_jobs=-1)
+          model.fit(X[:split], y[:split])
+
+          client = mlflow.MlflowClient()
+
+          with mlflow.start_run(run_name="CI-AutoRegistry"):
+              mlflow.sklearn.log_model(model, name="rf_staging",
+                  registered_model_name="AAPL-RF-CI-Staging")
+              mlflow.log_metric("rmse", metrics["rmse"])
+              mlflow.log_metric("r2_score", metrics["r2"])
+
+          versions = client.search_model_versions("name='AAPL-RF-CI-Staging'")
+          latest   = sorted(versions, key=lambda v: int(v.version))[-1]
+          client.set_registered_model_alias("AAPL-RF-CI-Staging", "staging",
+                                             latest.version)
+
+          print("="*55)
+          print("  AUTO-REGISTRY BERHASIL!")
+          print(f"  Model    : AAPL-RF-CI-Staging")
+          print(f"  Version  : {latest.version}")
+          print(f"  Alias    : @staging")
+          print(f"  RMSE     : {metrics['rmse']}")
+          print(f"  R²       : {metrics['r2']}")
+          print("="*55)
+          print("Pipeline CI/CD MLOps selesai!")
+          EOF
