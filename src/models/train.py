@@ -145,7 +145,7 @@ def run_experiment(experiment_name: str = "AAPL-RandomForest"):
         },
         {
             "run_name"        : "RF-Shallow-Trees",
-            "n_estimators"    : 300,
+            "n_estimators"    : 350,
             "max_depth"       : 10,
             "min_samples_split": 10,
             "min_samples_leaf" : 4,
