@@ -1,0 +1,86 @@
+# docker-compose.yaml
+# ============================================================
+# Orkestrasi Layanan MLOps - AAPL Stock Price Prediction
+# Rafly Januar Raharjo - 235150201111011 | MLOps Kelas B
+# ============================================================
+# Layanan:
+#   1. mlflow-server  — MLflow Tracking Server + Model Registry
+#   2. api-service    — FastAPI Inferensi Model
+# ============================================================
+
+version: "3.8"
+
+services:
+
+  # ============================================================
+  # LAYANAN 1: MLflow Tracking Server
+  # ============================================================
+  mlflow-server:
+    image: python:3.11-slim
+    container_name: mlflow-server
+    working_dir: /mlflow
+    command: >
+      bash -c "pip install mlflow==2.10.0 -q &&
+               mlflow server
+               --backend-store-uri sqlite:///mlflow.db
+               --default-artifact-root /mlflow/artifacts
+               --host 0.0.0.0
+               --port 5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persistent storage untuk database MLflow dan artifacts
+      - mlflow-db:/mlflow
+      - ./mlruns:/mlflow/mlruns
+      - ./models:/mlflow/models
+    networks:
+      - mlops-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # ============================================================
+  # LAYANAN 2: FastAPI Inferensi Model
+  # ============================================================
+  api-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-service
+    ports:
+      - "8000:8000"
+    environment:
+      # Koneksi ke MLflow server menggunakan nama service (service discovery)
+      - MLFLOW_TRACKING_URI=http://mlflow-server:5000
+      - MODEL_NAME=AAPL-RF-Production
+      - MODEL_ALIAS=production
+    volumes:
+      # Persistent storage untuk data dan model
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./mlflow.db:/app/mlflow.db
+    networks:
+      - mlops-network
+    depends_on:
+      mlflow-server:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ============================================================
+# NETWORK — Custom Bridge Network
+# ============================================================
+networks:
+  mlops-network:
+    driver: bridge
+    name: mlops-network
+
+# ============================================================
+# VOLUMES — Persistent Storage
+# ============================================================
+volumes:
+  mlflow-db:
+    name: mlops-mlflow-db
