@@ -1,17 +1,3 @@
-README kamu sebenarnya sudah sangat bagus dan detail 👍
-Tapi ada beberapa bagian yang sebaiknya di-update supaya konsisten dengan kondisi project terbaru:
-
-* MLflow sekarang pakai `2.10.0`, bukan `3.11.1`
-* Sekarang sudah pakai Docker Compose
-* Ada FastAPI health endpoint
-* Ada issue compatibility Python 3.13 → fixed dengan Python 3.11
-* Sebaiknya tambahkan `.gitignore`
-* Tambahkan section Docker deployment
-* Tambahkan architecture diagram sederhana
-* Rapikan beberapa istilah supaya lebih profesional untuk portfolio/recruiter
-
-Berikut versi update yang lebih clean dan production-ready untuk README kamu.
-
 ---
 
 # 📈 MLOps-StockPricePrediction
