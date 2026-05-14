@@ -46,7 +46,9 @@ Proyek ini membangun sistem Machine Learning production-ready untuk prediksi har
 | Dev Environment | GitHub Codespaces |
 
 ---
+
 ## 📁 Struktur Direktori
+```
 MLOps-StockPricePrediction/
 ├── .github/
 │   └── workflows/
@@ -79,7 +81,7 @@ MLOps-StockPricePrediction/
 ├── registry.py
 ├── inference.py
 └── README.md
----
+```
 
 ## 🐳 Menjalankan Seluruh Sistem dengan Docker Compose
 
