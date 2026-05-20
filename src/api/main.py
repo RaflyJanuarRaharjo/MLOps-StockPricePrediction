@@ -17,7 +17,7 @@ from typing import Optional
 
 # --- Konfigurasi ---
 MLFLOW_URI  = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow.db")
-MODEL_NAME  = os.getenv("MODEL_NAME", "AAPL-RF-Production")
+MODEL_NAME = "AAPL-RF-Production"
 MODEL_ALIAS = os.getenv("MODEL_ALIAS", "production")
 
 FEATURE_COLS = [

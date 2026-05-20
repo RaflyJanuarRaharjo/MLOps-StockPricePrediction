@@ -2,7 +2,7 @@ import mlflow
 import pandas as pd
 import glob
 
-mlflow.set_tracking_uri('sqlite:///mlflow.db')
+mlflow.set_tracking_uri('http://127.0.0.1:5000')
 
 print("="*55)
 print("  VERIFIKASI INFERENSI — AAPL Stock Price Prediction")
