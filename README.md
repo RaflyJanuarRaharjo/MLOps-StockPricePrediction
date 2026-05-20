@@ -1,4 +1,3 @@
-@"
 # 📈 MLOps-StockPricePrediction
 
 > Sistem MLOps end-to-end untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
@@ -48,7 +47,6 @@ Proyek ini membangun sistem Machine Learning production-ready untuk prediksi har
 | Dev Environment | GitHub Codespaces |
 
 ---
-
 ## 📁 Struktur Direktori
 \`\`\`
 MLOps-StockPricePrediction/
@@ -84,7 +82,6 @@ MLOps-StockPricePrediction/
 ├── inference.py
 └── README.md
 \`\`\`
-
 ---
 
 ## 🐳 Menjalankan Seluruh Sistem dengan Docker Compose
@@ -388,4 +385,3 @@ pytest tests/test_pipeline.py -v
 | LK-9 | Docker Compose Orchestration | ✅ |
 | LK-10 | Horizontal Scaling + Load Balancer | ✅ |
 | Bonus | GitHub Actions Automasi Harian | ✅ |
-"@ | Set-Content README.md
