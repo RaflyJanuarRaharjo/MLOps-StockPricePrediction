@@ -1,236 +1,250 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[codz]
-*$py.class
+# 📈 MLOps-StockPricePrediction
 
-# C extensions
-*.so
+> Sistem MLOps end-to-end untuk prediksi harga saham harian **AAPL (Apple Inc.)** menggunakan **Random Forest Regressor** dengan strategi **Continuous Training**.
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![MLflow](https://img.shields.io/badge/MLflow-2.10.0-orange)
+![DVC](https://img.shields.io/badge/DVC-enabled-green)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-automated-brightgreen)
+![CI/CD](https://img.shields.io/badge/CI%2FCD-passing-success)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+**Mata Kuliah:** MLOps - Kelas B | Universitas Brawijaya 2026  
+**Nama:** Rafly Januar Raharjo | **NIM:** 235150201111011
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+---
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py.cover
-.hypothesis/
-.pytest_cache/
-cover/
+## 📌 Deskripsi Proyek
 
-# Translations
-*.mo
-*.pot
+Proyek ini membangun sistem Machine Learning production-ready untuk prediksi harga penutupan saham AAPL (T+1) berbasis prinsip MLOps. Sistem mencakup:
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+- **Pipeline data otomatis** — ingestion harian dari Yahoo Finance API
+- **Data versioning** — DVC untuk melacak perubahan dataset
+- **Experiment tracking** — MLflow untuk mencatat semua eksperimen
+- **Model registry** — pengelolaan siklus hidup model dari Staging ke Production
+- **CI/CD automation** — GitHub Actions untuk "Code as Trigger"
+- **Continuous Training** — retraining otomatis berbasis perubahan kode
+- **Container orchestration** — Docker Compose untuk menjalankan seluruh sistem
 
-# Flask stuff:
-instance/
-.webassets-cache
+---
 
-# Scrapy stuff:
-.scrapy
+## 🛠️ Tech Stack
 
-# Sphinx documentation
-docs/_build/
+| Komponen | Teknologi |
+|----------|-----------|
+| Language | Python 3.11 |
+| ML Model | scikit-learn (Random Forest Regressor) |
+| Data Source | Yahoo Finance API (yfinance) |
+| API Backend | FastAPI |
+| Frontend | HTML + CSS + JavaScript |
+| Experiment Tracking | MLflow 2.10.0 |
+| Drift Detection | Evidently AI |
+| Data Versioning | DVC |
+| CI/CD | GitHub Actions |
+| Testing | pytest |
+| Containerization | Docker + Docker Compose |
+| Dev Environment | GitHub Codespaces |
 
-# PyBuilder
-.pybuilder/
-target/
+---
 
-# Jupyter Notebook
-.ipynb_checkpoints
+## 📁 Struktur Direktori
+```
+MLOps-StockPricePrediction/
+├── .github/
+│   └── workflows/
+│       ├── daily_ingestion.yml
+│       └── mlops-automation.yaml
+├── .dvc/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── external/
+├── models/
+│   └── registry/
+├── src/
+│   ├── data/
+│   │   ├── ingest_data.py
+│   │   ├── preprocess.py
+│   │   ├── pipeline.py
+│   │   └── scheduler.py
+│   ├── features/
+│   │   └── feature_eng.py
+│   ├── models/
+│   │   └── train.py
+│   └── api/
+│       └── main.py
+├── tests/
+│   └── test_pipeline.py
+├── Dockerfile
+├── docker-compose.yaml
+├── mlflow.db
+├── registry.py
+├── inference.py
+└── README.md
+```
 
-# IPython
-profile_default/
-ipython_config.py
+## 🐳 Menjalankan Seluruh Sistem dengan Docker Compose
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+### Prasyarat
+- Docker Desktop terinstall → https://www.docker.com/products/docker-desktop/
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+### Jalankan dengan 1 perintah:
+```bash
+docker compose up -d
+```
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
+### Cek status container:
+```bash
+docker compose ps
+```
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-#poetry.toml
+### Akses layanan:
+| Layanan | URL | Fungsi |
+|---------|-----|--------|
+| **FastAPI** | http://localhost:8000/docs | Swagger UI inferensi model |
+| **MLflow UI** | http://localhost:5000 | Dashboard eksperimen |
+| **API Health** | http://localhost:8000/health | Status API |
+| **Prediksi** | http://localhost:8000/predict-latest | Prediksi harga terbaru |
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
-#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
-#pdm.lock
-#pdm.toml
-.pdm-python
-.pdm-build/
+### Training model ke MLflow container:
+```bash
+$env:MLFLOW_TRACKING_URI="http://127.0.0.1:5000"
+python src/models/train.py
+```
 
-# pixi
-#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
-#pixi.lock
-#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
-#   in the .venv directory. It is recommended not to include this directory in version control.
-.pixi
+### Hentikan semua layanan:
+```bash
+docker compose down
+```
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+---
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+## 🚀 Cara Menjalankan Lokal (Tanpa Docker)
 
-# SageMath parsed files
-*.sage.py
+```bash
+git clone https://github.com/RaflyJanuarRaharjo/MLOps-StockPricePrediction.git
+cd MLOps-StockPricePrediction
+pip install yfinance pandas numpy mlflow scikit-learn dvc pytest fastapi uvicorn
+git pull origin main
+python src/data/ingest_data.py
+python src/data/preprocess.py
+python src/models/train.py
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+python inference.py
+```
 
-# Environments
-.env
-.envrc
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+---
 
-# Spyder project settings
-.spyderproject
-.spyproject
+## 🔄 Mengecek Prediksi Harga AAPL Terbaru
 
-# Rope project settings
-.ropeproject
+Jalankan setiap pagi setelah pukul 04:00 WIB:
 
-# mkdocs documentation
-/site
+```bash
+git pull origin main
+python src/data/ingest_data.py
+python src/data/preprocess.py
+python inference.py
+```
 
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
+> **Catatan:** Data tersedia setelah NYSE tutup pukul 16:00 ET (04:00 WIB). Prediksi pada tanggal T menghasilkan harga penutupan T+1.
 
-# Pyre type checker
-.pyre/
+---
 
-# pytype static type analyzer
-.pytype/
+## 📦 Data Versioning dengan DVC
 
-# Cython debug symbols
-cython_debug/
+```bash
+dvc add data/raw/aapl_raw_20260331_170609.csv
+git add data/raw/aapl_raw_20260331_170609.csv.dvc
+git commit -m "data(v1.0.0): track initial dataset"
+git tag data-v1.0.0
+dvc diff HEAD~1 HEAD
+```
 
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+---
 
-# Abstra
-# Abstra is an AI-powered process automation framework.
-# Ignore directories containing user credentials, local state, and settings.
-# Learn more at https://abstra.io/docs
-.abstra/
+## 🧪 MLflow Experiment Tracking
 
-# Visual Studio Code
-#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
-#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
-#  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
+| Run Name | n_estimators | max_depth | RMSE | R² |
+|----------|-------------|-----------|------|-----|
+| RF-Baseline | 100 | None | 4.8743 | 0.6901 |
+| RF-Deep-Trees | 200 | 20 | 4.8370 | 0.6948 |
+| **RF-Shallow-Trees** ⭐ | **300** | **10** | **4.3644** | **0.8582** |
 
-# Ruff stuff:
-.ruff_cache/
+---
 
-# PyPI configuration file
-.pypirc
+## 🏆 Model Aktif untuk Inferensi
 
-# Cursor
-#  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
-#  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
-#  refer to https://docs.cursor.com/context/ignore-files
-.cursorignore
-.cursorindexingignore
+**Model:** `AAPL-RF-Production` — **Version 1** — **Alias: @production**
 
-# Marimo
-marimo/_static/
-marimo/_lsp/
-__marimo__/
+| Metrik | Nilai | Keterangan |
+|--------|-------|------------|
+| RMSE | 4.3644 | Error rata-rata ±$4.36 |
+| MAE | 3.3308 | Absolut error rata-rata |
+| R² | 0.8582 | Menjelaskan 85.82% variansi |
+| MAPE | 1.2502% | Error persentase sangat rendah |
 
-# =========================
-# MLflow & MLOps Project
-# =========================
+```python
+import mlflow
+mlflow.set_tracking_uri('sqlite:///mlflow.db')
+model = mlflow.pyfunc.load_model('models:/AAPL-RF-Production@production')
+predictions = model.predict(X)
+```
 
-# MLflow
-mlruns/
-mlflow.db
+---
 
-# Saved models
-*.pkl
+## ⚙️ CI/CD Pipeline — Code as Trigger (LK-8)
+git push origin main
+↓
+Tahap 1: pytest (6 unit tests)
+↓
+Tahap 2: Auto Training + MLflow logging
+↓
+Tahap 3: Validasi threshold (RMSE<10, R²>0.5, MAPE<5%)
+↓
+Tahap 4: Auto Registry → @staging
 
-# Dataset
-data/raw/
-data/processed/
+---
 
-# Virtual environment
-venv311/
+## ⏰ Automasi Harian
 
-# Python cache
-__pycache__/
-*.pyc
+Pipeline data otomatis setiap **Senin–Jumat 04:00 WIB**:
+daily_ingestion.yml → ingest_data.py → preprocess.py → git push
 
-# Environment variables
-.env
+---
 
-# OS files
-.DS_Store
-Thumbs.db
+## 📊 Fitur Teknikal (19 Fitur)
+
+| Kategori | Fitur |
+|----------|-------|
+| OHLCV | Open, High, Low, Close, Volume |
+| Moving Average | MA_7, MA_14, MA_30 |
+| Momentum | RSI_14, MACD, Signal, Hist |
+| Volatilitas | BB_upper, BB_lower |
+| Return | Daily_Return |
+| Lag | Close_lag1, Close_lag2, Close_lag5 |
+| Volume | Vol_MA_7 |
+| **Target** | **Close T+1** |
+
+---
+
+## 🧪 Unit Tests
+
+```bash
+pytest tests/test_pipeline.py -v
+```
+
+---
+
+## ✅ Status Implementasi
+
+| LK | Komponen | Status |
+|----|----------|--------|
+| LK-2 | GitHub Repository + Codespaces | ✅ |
+| LK-3 | Rancangan Pipeline ETL + Diagram | ✅ |
+| LK-4 | ingest_data.py + preprocess.py | ✅ |
+| LK-5 | DVC Data Versioning | ✅ |
+| LK-6 | MLflow Experiment Tracking | ✅ |
+| LK-7 | Model Registry + Inferensi Production | ✅ |
+| LK-8 | CI/CD Code as Trigger | ✅ |
+| LK-9 | Docker Compose Orchestration | ✅ |
+| Bonus | GitHub Actions Automasi Harian | ✅ |
