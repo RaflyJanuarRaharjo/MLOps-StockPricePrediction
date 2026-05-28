@@ -1,7 +1,7 @@
 # docker-compose.yaml
 # ============================================================
-# Orkestrasi Layanan MLOps dengan Horizontal Scaling
-# AAPL Stock Price Prediction - LK-10
+# Orkestrasi Layanan MLOps dengan Monitoring Stack
+# AAPL Stock Price Prediction - LK-11
 # Rafly Januar Raharjo - 235150201111011 | MLOps Kelas B
 # ============================================================
 
@@ -74,6 +74,47 @@ services:
       - api-service
     restart: unless-stopped
 
+  # ============================================================
+  # LAYANAN 4: Prometheus (LK-11)
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=7d'
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
+  # ============================================================
+  # LAYANAN 5: Grafana (LK-11)
+  # ============================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
 # ============================================================
 # NETWORK
 # ============================================================
@@ -88,3 +129,7 @@ networks:
 volumes:
   mlflow-db:
     name: mlops-mlflow-db
+  prometheus-data:
+    name: mlops-prometheus-data
+  grafana-data:
+    name: mlops-grafana-data

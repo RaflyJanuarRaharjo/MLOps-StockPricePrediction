@@ -1,0 +1,13 @@
+# grafana/provisioning/dashboards/dashboard.yaml
+apiVersion: 1
+
+providers:
+  - name: 'AAPL ML Monitoring'
+    orgId: 1
+    folder: 'ML Dashboards'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

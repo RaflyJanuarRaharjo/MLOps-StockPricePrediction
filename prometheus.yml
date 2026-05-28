@@ -1,0 +1,36 @@
+# prometheus.yml
+# ============================================================
+# Konfigurasi Prometheus Scraper
+# AAPL Stock Price Prediction - LK-11
+# Rafly Januar Raharjo - 235150201111011 | MLOps Kelas B
+# ============================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Scraping metrik dari API service (semua replika via Nginx)
+  - job_name: 'aapl-api'
+    static_configs:
+      - targets: ['load-balancer:80']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Scraping langsung ke masing-masing replika (Docker internal DNS)
+  # Docker Compose memberi nama: mlops-stockpriceprediction-api-service-1, dst
+  - job_name: 'aapl-api-replicas'
+    dns_sd_configs:
+      - names:
+          - 'api-service'
+        type: 'A'
+        port: 8080
+    metrics_path: '/metrics'
+    scrape_interval: 10s

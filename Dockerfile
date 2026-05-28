@@ -22,7 +22,9 @@ RUN pip install --no-cache-dir \
     scikit-learn==1.4.0 \
     pandas==2.1.4 \
     numpy==1.26.3 \
-    yfinance==0.2.36
+    yfinance==0.2.36 \
+    prometheus-client==0.19.0 \
+    psutil==5.9.6
 
 # Copy source code
 COPY src/ ./src/
