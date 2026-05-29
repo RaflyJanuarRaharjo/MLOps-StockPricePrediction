@@ -15,7 +15,8 @@ def load_latest_raw():
     latest = files[-1]
     print(f"[INFO] Membaca file: {latest}")
     df = pd.read_csv(latest, index_col="Date", parse_dates=True)
-    if df.index.tz is not None:
+    # Fix: hasattr check sebelum akses .tz agar kompatibel semua versi pandas
+    if hasattr(df.index, 'tz') and df.index.tz is not None:
         df.index = df.index.tz_localize(None)
     return df
 
