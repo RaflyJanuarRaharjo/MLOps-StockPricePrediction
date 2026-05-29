@@ -42,6 +42,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/raw/*.csv data/processed/*.csv 2>/dev/null || true
+          # Force add CSV langsung ke git (bypass DVC tracking)
+          git add -f data/raw/*.csv data/processed/*.csv 2>/dev/null || true
           git diff --staged --quiet || git commit -m "data: auto-ingest AAPL $(date +'%Y-%m-%d') [skip ci]"
           git push || echo "Nothing to push"
