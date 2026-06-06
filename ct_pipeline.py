@@ -8,7 +8,6 @@
 import os
 import glob
 import json
-import pickle
 import warnings
 import numpy as np
 import pandas as pd
@@ -25,7 +24,14 @@ warnings.filterwarnings("ignore")
 # CONFIG
 # ============================================================
 
-MLFLOW_URI  = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+# GitHub Actions pakai SQLite, lokal pakai HTTP server
+IS_CI = os.getenv("GITHUB_ACTIONS", "false") == "true"
+
+if IS_CI:
+    MLFLOW_URI = "sqlite:///mlflow.db"
+else:
+    MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+
 MODEL_NAME  = "AAPL-RF-Production"
 DATA_PROC   = "data/processed"
 MODEL_DIR   = "models/registry"
@@ -38,7 +44,6 @@ FEATURE_COLS = [
     "Close_lag1", "Close_lag2", "Close_lag5", "Vol_MA_7"
 ]
 
-# Threshold untuk validasi model baru
 THRESHOLDS = {
     "rmse_max" : 15.0,
     "mae_max"  : 10.0,
@@ -163,7 +168,6 @@ def compare_and_promote(new_metrics, old_metrics, new_run_id):
         print(f"  Model LAMA  : RMSE={old_rmse:.4f} | R²={old_r2:.4f}")
         print(f"  Model BARU  : RMSE={new_metrics['rmse']} | R²={new_metrics['r2']}")
         print("-"*55)
-
         is_better = (
             new_metrics["rmse"] < old_rmse and
             new_metrics["r2"]   > old_r2
@@ -172,7 +176,6 @@ def compare_and_promote(new_metrics, old_metrics, new_run_id):
         print("  Tidak ada model production sebelumnya.")
         is_better = True
 
-    # Validasi threshold
     passes_threshold = (
         new_metrics["rmse"] <= THRESHOLDS["rmse_max"] and
         new_metrics["mae"]  <= THRESHOLDS["mae_max"]  and
@@ -181,7 +184,6 @@ def compare_and_promote(new_metrics, old_metrics, new_run_id):
     )
 
     if is_better and passes_threshold:
-        # Ambil versi terbaru dan promote
         versions = client.search_model_versions(f"name='{MODEL_NAME}'")
         latest   = sorted(versions, key=lambda v: int(v.version))[-1]
         client.set_registered_model_alias(MODEL_NAME, "production", latest.version)
@@ -205,28 +207,24 @@ def compare_and_promote(new_metrics, old_metrics, new_run_id):
 def run_ct_pipeline(trigger_reason="manual"):
     print("\n" + "="*55)
     print("  CONTINUOUS TRAINING PIPELINE - LK-12")
-    print(f"  Trigger: {trigger_reason}")
-    print(f"  Waktu  : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  Trigger : {trigger_reason}")
+    print(f"  MLflow  : {MLFLOW_URI}")
+    print(f"  Waktu   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*55)
 
-    # 1. Load data terbaru
     X, y, data_file = load_latest_data()
-
-    # 2. Ambil metrik model production saat ini
     old_metrics, old_version = get_production_metrics()
 
-    # 3. Train model baru
     print("\n[STEP] Training model baru...")
     new_result = train_new_model(X, y, trigger_reason)
 
-    # 4. Compare dan promote
     print("\n[STEP] Membandingkan model...")
     promoted = compare_and_promote(new_result, old_metrics, new_result["run_id"])
 
-    # 5. Simpan hasil ke JSON
     result_summary = {
         "timestamp"      : datetime.now().isoformat(),
         "trigger_reason" : trigger_reason,
+        "mlflow_uri"     : MLFLOW_URI,
         "data_file"      : data_file,
         "new_model"      : {
             "run_id": new_result["run_id"],
