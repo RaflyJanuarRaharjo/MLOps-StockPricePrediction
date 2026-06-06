@@ -1,0 +1,197 @@
+name: Continuous Training Pipeline - LK-12
+
+on:
+  # Skenario B: Data-based — dipicu saat data processed berubah
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/processed/**'
+      - 'data/raw/**'
+
+  # Skenario C: Schedule-based — setiap Minggu jam 05:00 WIB (22:00 UTC Sabtu)
+  schedule:
+    - cron: '0 22 * * 6'
+
+  # Manual trigger (untuk simulasi)
+  workflow_dispatch:
+    inputs:
+      trigger_reason:
+        description: 'Alasan trigger CT (manual/performance/data_drift/schedule)'
+        required: true
+        default: 'manual'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PYTHONPATH: ${{ github.workspace }}
+
+jobs:
+  # ============================================================
+  # JOB 1: Deteksi Trigger & Validasi Data
+  # ============================================================
+  detect-trigger:
+    name: "Step 1 - Deteksi Trigger & Validasi Data"
+    runs-on: ubuntu-latest
+
+    outputs:
+      should_retrain: ${{ steps.check.outputs.should_retrain }}
+      trigger_reason: ${{ steps.check.outputs.trigger_reason }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install pandas numpy
+
+      - name: Check Trigger Condition
+        id: check
+        run: |
+          python << 'EOF'
+          import os, glob
+
+          # Tentukan trigger reason
+          event = os.environ.get("GITHUB_EVENT_NAME", "")
+          trigger_input = os.environ.get("INPUT_TRIGGER_REASON", "")
+
+          if event == "workflow_dispatch":
+              reason = trigger_input or "manual"
+          elif event == "schedule":
+              reason = "schedule"
+          elif event == "push":
+              reason = "data_update"
+          else:
+              reason = "unknown"
+
+          # Cek apakah ada data processed
+          files = sorted(glob.glob("data/processed/aapl_features_*.csv"))
+          has_data = len(files) > 0
+
+          print(f"Trigger reason : {reason}")
+          print(f"Data files     : {len(files)}")
+          print(f"Should retrain : {has_data}")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"should_retrain={'true' if has_data else 'false'}\n")
+              f.write(f"trigger_reason={reason}\n")
+          EOF
+        env:
+          INPUT_TRIGGER_REASON: ${{ github.event.inputs.trigger_reason }}
+
+  # ============================================================
+  # JOB 2: Data Ingestion & Preprocessing
+  # ============================================================
+  prepare-data:
+    name: "Step 2 - Persiapan Data Terbaru"
+    runs-on: ubuntu-latest
+    needs: detect-trigger
+    if: needs.detect-trigger.outputs.should_retrain == 'true'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install yfinance pandas numpy scikit-learn
+
+      - name: Create Data Directories
+        run: mkdir -p data/raw data/processed models/registry
+
+      - name: Fetch Latest Data
+        continue-on-error: true
+        run: python src/data/ingest_data.py
+
+      - name: Run Preprocessing
+        run: python src/data/preprocess.py
+
+      - name: Upload Processed Data
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-data
+          path: data/processed/
+
+  # ============================================================
+  # JOB 3: Continuous Training + Compare + Promote
+  # ============================================================
+  continuous-training:
+    name: "Step 3 - Continuous Training & Evaluasi Komparatif"
+    runs-on: ubuntu-latest
+    needs: [detect-trigger, prepare-data]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install pandas numpy scikit-learn mlflow
+
+      - name: Create Directories
+        run: mkdir -p data/processed models/registry
+
+      - name: Download Processed Data
+        uses: actions/download-artifact@v4
+        with:
+          name: processed-data
+          path: data/processed/
+
+      - name: Run Continuous Training Pipeline
+        run: |
+          python ct_pipeline.py ${{ needs.detect-trigger.outputs.trigger_reason }}
+
+      - name: Upload CT Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: ct-result
+          path: ct_result.json
+
+      - name: Print CT Summary
+        run: |
+          echo "===== CT PIPELINE RESULT ====="
+          cat ct_result.json
+          echo "=============================="
+
+  # ============================================================
+  # JOB 4: Commit Updated Data ke Repo
+  # ============================================================
+  commit-data:
+    name: "Step 4 - Commit Data Terbaru ke Repo"
+    runs-on: ubuntu-latest
+    needs: continuous-training
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Processed Data
+        uses: actions/download-artifact@v4
+        with:
+          name: processed-data
+          path: data/processed/
+
+      - name: Download CT Result
+        uses: actions/download-artifact@v4
+        with:
+          name: ct-result
+
+      - name: Commit to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f data/processed/*.csv 2>/dev/null || true
+          git add ct_result.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "ct: auto-retrain AAPL $(date +'%Y-%m-%d') trigger=${{ needs.detect-trigger.outputs.trigger_reason }} [skip ci]"
+          git push || echo "Nothing to push"

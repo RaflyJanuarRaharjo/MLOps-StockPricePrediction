@@ -1,8 +1,5 @@
-# prometheus.yml
-# ============================================================
-# Konfigurasi Prometheus Scraper
-# AAPL Stock Price Prediction - LK-11
-# Rafly Januar Raharjo - 235150201111011 | MLOps Kelas B
+# prometheus.yml - Update LK-12
+# Ditambahkan alerting rules untuk Continuous Training trigger
 # ============================================================
 
 global:
@@ -10,22 +7,30 @@ global:
   evaluation_interval: 15s
   scrape_timeout: 10s
 
+# ============================================================
+# ALERTING RULES (LK-12)
+# ============================================================
+rule_files:
+  - "alert_rules.yml"
+
+# Alertmanager config (opsional - untuk notifikasi)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
 scrape_configs:
 
-  # Prometheus self-monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  # Scraping metrik dari API service (semua replika via Nginx)
   - job_name: 'aapl-api'
     static_configs:
       - targets: ['load-balancer:80']
     metrics_path: '/metrics'
     scrape_interval: 10s
 
-  # Scraping langsung ke masing-masing replika (Docker internal DNS)
-  # Docker Compose memberi nama: mlops-stockpriceprediction-api-service-1, dst
   - job_name: 'aapl-api-replicas'
     dns_sd_configs:
       - names:

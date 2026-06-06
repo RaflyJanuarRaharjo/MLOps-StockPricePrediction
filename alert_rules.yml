@@ -1,0 +1,82 @@
+# alert_rules.yml - LK-12
+# Prometheus Alerting Rules untuk Continuous Training Trigger
+# Rafly Januar Raharjo - 235150201111011 | MLOps Kelas B
+# ============================================================
+
+groups:
+  - name: aapl_model_alerts
+    interval: 30s
+    rules:
+
+      # ======================================================
+      # SKENARIO A: Performance-based Alert
+      # Trigger CT jika prediksi harga terlalu jauh dari range normal
+      # ======================================================
+
+      - alert: ModelPredictionAnomaly
+        expr: |
+          aapl_prediction_price_usd < 200 or aapl_prediction_price_usd > 400
+        for: 2m
+        labels:
+          severity: warning
+          trigger: performance_based
+        annotations:
+          summary: "Prediksi AAPL di luar range normal"
+          description: >
+            Prediksi harga AAPL = {{ $value }}.
+            Nilai di luar range $200-$400 mengindikasikan model decay.
+            Continuous Training perlu dijalankan.
+
+      - alert: HighInferenceLatency
+        expr: |
+          rate(api_request_duration_seconds_sum[5m])
+          / rate(api_request_duration_seconds_count[5m]) > 2.0
+        for: 3m
+        labels:
+          severity: warning
+          trigger: performance_based
+        annotations:
+          summary: "Latensi inferensi terlalu tinggi"
+          description: >
+            Rata-rata latensi = {{ $value }}s (threshold: 2.0s).
+            Model mungkin kesulitan memproses input baru.
+
+      # ======================================================
+      # SKENARIO B: Data-based Alert
+      # Trigger CT jika throughput turun drastis
+      # ======================================================
+
+      - alert: LowAPIThroughput
+        expr: |
+          rate(api_requests_total[5m]) < 0.1
+        for: 5m
+        labels:
+          severity: info
+          trigger: data_based
+        annotations:
+          summary: "Throughput API sangat rendah"
+          description: >
+            Request rate = {{ $value }} req/s.
+            Sistem mungkin tidak menerima traffic normal.
+
+      # ======================================================
+      # High CPU/Memory Alert
+      # ======================================================
+
+      - alert: HighCPUUsage
+        expr: system_cpu_usage_percent > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU usage tinggi"
+          description: "CPU usage = {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: system_memory_usage_percent > 85
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Memory usage kritis"
+          description: "Memory usage = {{ $value }}%"
