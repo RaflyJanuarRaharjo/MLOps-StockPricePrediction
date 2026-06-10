@@ -465,16 +465,30 @@ daily_ingestion.yml → ingest_data.py → preprocess.py → git push
 
 # 📊 Fitur Teknikal
 
-| Kategori       | Fitur                              |
-| -------------- | ---------------------------------- |
-| OHLCV          | Open, High, Low, Close, Volume     |
-| Moving Average | MA_7, MA_14, MA_30                 |
-| Momentum       | RSI_14, MACD, Signal, Hist         |
-| Volatilitas    | BB_upper, BB_lower                 |
-| Return         | Daily_Return                       |
-| Lag            | Close_lag1, Close_lag2, Close_lag5 |
-| Volume         | Vol_MA_7                           |
-| Target         | Close T+1                          |
+
+Model **Random Forest Regressor** memanfaatkan 19 fitur hasil pengolahan data historis saham Apple Inc. (AAPL). Fitur-fitur ini terdiri dari data harga dasar, indikator teknikal, serta hasil *feature engineering* untuk membantu model mengenali pola pergerakan harga saham.
+
+| No. | Fitur | Deskripsi | Tujuan |
+|------|--------|-----------|---------|
+| 1 | **Open** | Harga pertama saat pasar NYSE dibuka pada hari perdagangan. | Menunjukkan ekspektasi awal investor terhadap harga saham pada hari tersebut. |
+| 2 | **High** | Harga tertinggi yang dicapai selama satu hari perdagangan. | Menggambarkan tingkat optimisme pasar pada hari tersebut. |
+| 3 | **Low** | Harga terendah yang dicapai selama satu hari perdagangan. | Menggambarkan tingkat pesimisme pasar pada hari tersebut. |
+| 4 | **Close** | Harga terakhir saat pasar ditutup. | Menjadi acuan utama nilai saham dan salah satu fitur paling penting dalam prediksi. |
+| 5 | **Volume** | Jumlah saham yang diperdagangkan dalam satu hari. | Mengukur aktivitas perdagangan dan minat investor. |
+| 6 | **MA_7** | Rata-rata harga penutupan selama 7 hari terakhir. | Mengidentifikasi tren jangka pendek dan mengurangi fluktuasi harian. |
+| 7 | **MA_14** | Rata-rata harga penutupan selama 14 hari terakhir. | Mengidentifikasi tren jangka menengah dengan pergerakan yang lebih stabil. |
+| 8 | **MA_30** | Rata-rata harga penutupan selama 30 hari terakhir. | Menggambarkan arah tren jangka panjang. |
+| 9 | **RSI_14** | Relative Strength Index dengan periode 14 hari (nilai 0–100). | Mengukur momentum harga dan mendeteksi kondisi overbought maupun oversold. |
+| 10 | **MACD** | Selisih antara EMA 12 hari dan EMA 26 hari. | Mengidentifikasi arah tren dan perubahan momentum harga. |
+| 11 | **Signal** | EMA 9 hari dari nilai MACD. | Memberikan sinyal konfirmasi untuk perubahan tren. |
+| 12 | **Hist** | Selisih antara MACD dan Signal Line. | Mengukur kekuatan momentum naik atau turun. |
+| 13 | **BB_upper** | Batas atas Bollinger Bands. | Menunjukkan area harga yang relatif tinggi berdasarkan volatilitas. |
+| 14 | **BB_lower** | Batas bawah Bollinger Bands. | Menunjukkan area harga yang relatif rendah berdasarkan volatilitas. |
+| 15 | **Daily_Return** | Persentase perubahan harga penutupan dibanding hari sebelumnya. | Mengukur keuntungan atau kerugian harian saham. |
+| 16 | **Close_lag1** | Harga penutupan satu hari sebelumnya. | Memberikan informasi historis jangka sangat pendek untuk prediksi berikutnya. |
+| 17 | **Close_lag2** | Harga penutupan dua hari sebelumnya. | Membantu model mengenali pola pergerakan dalam beberapa hari terakhir. |
+| 18 | **Close_lag5** | Harga penutupan lima hari sebelumnya. | Menangkap pola mingguan pada pergerakan harga saham. |
+| 19 | **Vol_MA_7** | Rata-rata volume perdagangan selama 7 hari terakhir. | Mengonfirmasi kekuatan tren berdasarkan aktivitas transaksi. |
 
 ---
 
