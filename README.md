@@ -42,6 +42,20 @@ Proyek ini bertujuan untuk:
 7. Membangun pipeline **CI/CD** menggunakan GitHub Actions agar proses pengembangan, pengujian, dan deployment berjalan otomatis dan konsisten.
 8. Menunjukkan implementasi lengkap konsep MLOps sebagai proyek akademik sekaligus dasar pengembangan sistem prediksi saham yang lebih skalabel dan andal.
 
+## 🤖 Alasan Menggunakan Random Forest Regressor
+
+Pemilihan algoritma **Random Forest Regressor** pada proyek ini didasarkan pada beberapa pertimbangan berikut:
+
+- **Mampu menangani hubungan non-linear**, sehingga cocok untuk memodelkan pergerakan harga saham yang dipengaruhi oleh berbagai faktor dan pola yang kompleks.
+- **Mengurangi risiko overfitting** karena menggunakan metode ensemble yang menggabungkan banyak decision tree dan menghasilkan prediksi berdasarkan rata-rata dari seluruh pohon.
+- **Memiliki performa yang stabil** pada data tabular, terutama ketika menggunakan kombinasi fitur historis dan indikator teknikal seperti Moving Average, RSI, MACD, dan Bollinger Bands.
+- **Tidak memerlukan asumsi distribusi data tertentu**, sehingga lebih fleksibel dibandingkan beberapa metode regresi tradisional.
+- **Mudah diimplementasikan dan dioptimalkan**, dengan parameter seperti jumlah pohon (*n_estimators*) dan kedalaman pohon (*max_depth*) yang dapat disesuaikan untuk meningkatkan performa model.
+- **Tahan terhadap noise dan outlier**, sehingga dapat memberikan prediksi yang lebih konsisten pada data pasar saham yang cenderung fluktuatif.
+- **Terintegrasi dengan baik dalam ekosistem MLOps**, termasuk dengan scikit-learn dan MLflow, sehingga memudahkan proses pelatihan, pelacakan eksperimen, deployment, dan continuous training.
+
+Berdasarkan hasil eksperimen pada proyek ini, **Random Forest Regressor** mampu menghasilkan performa yang baik dengan metrik evaluasi seperti **RMSE sekitar 4.36**, **R² sekitar 0.86**, dan **MAPE sekitar 1.25%**, sehingga dipilih sebagai model produksi untuk prediksi harga penutupan saham AAPL.
+
 ---
 
 # 🛠️ Tech Stack
