@@ -29,18 +29,6 @@
 
 Proyek ini membangun sistem **Machine Learning production-ready** untuk memprediksi harga penutupan saham **AAPL (Apple Inc.)** pada hari berikutnya (**T+1**) menggunakan algoritma **Random Forest Regressor** berbasis prinsip **MLOps**.
 
-Sistem mencakup:
-
-* Pipeline data otomatis dari Yahoo Finance API
-* Data versioning menggunakan DVC
-* Experiment tracking menggunakan MLflow
-* Model registry untuk lifecycle management
-* CI/CD automation menggunakan GitHub Actions
-* Continuous Training berbasis perubahan kode
-* Container orchestration menggunakan Docker Compose
-* Horizontal scaling dengan Nginx load balancer
-* Monitoring operasional dengan Prometheus + Grafana (LK-11)
-* **Continuous Training Pipeline dengan deteksi drift otomatis (LK-12)**
 
 ---
 
