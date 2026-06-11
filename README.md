@@ -58,6 +58,32 @@ Berdasarkan hasil eksperimen pada proyek ini, **Random Forest Regressor** mampu 
 
 ---
 
+# 🏋️ Cara Kerja Training Model
+
+Proses training dilakukan melalui beberapa tahapan berikut:
+
+1. **Memuat data hasil preprocessing** yang berisi 19 fitur teknikal dan target prediksi.
+2. **Membagi dataset menjadi 80% data training dan 20% data testing** berdasarkan urutan waktu (*time series split*). Pembagian ini dilakukan agar model belajar dari data historis dan diuji pada data yang lebih baru, sehingga menghindari *data leakage* dan mencerminkan kondisi prediksi di dunia nyata.
+3. **Melatih tiga konfigurasi Random Forest Regressor** dengan parameter yang berbeda untuk mencari performa terbaik.
+4. **Melakukan prediksi pada data testing** dan menghitung metrik evaluasi seperti RMSE, MAE, R², dan MAPE.
+5. **Mencatat seluruh eksperimen ke MLflow**, termasuk parameter, metrik, model, dan feature importance.
+6. **Memilih model dengan RMSE terbaik** sebagai model produksi dan menyimpannya untuk proses inferensi.
+
+```
+
+Atau jika ingin versi yang lebih singkat untuk presentasi:
+
+```markdown
+## 🏋️ Cara Kerja Training
+
+- Memuat data hasil preprocessing (19 fitur teknikal).
+- Membagi data menjadi **80% training** dan **20% testing** berdasarkan urutan waktu untuk menghindari *data leakage*.
+- Melatih beberapa konfigurasi **Random Forest Regressor**.
+- Mengevaluasi model menggunakan **RMSE, MAE, R², dan MAPE**.
+- Menyimpan hasil eksperimen ke **MLflow** dan memilih model dengan performa terbaik.
+```
+
+
 # 🛠️ Tech Stack
 
 | Komponen                | Teknologi                              |
