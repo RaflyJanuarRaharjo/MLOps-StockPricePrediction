@@ -29,19 +29,6 @@
 
 Proyek ini membangun sistem **Machine Learning production-ready** untuk memprediksi harga penutupan saham **AAPL (Apple Inc.)** pada hari berikutnya (**T+1**) menggunakan algoritma **Random Forest Regressor** berbasis prinsip **MLOps**.
 
-# 🎯 Tujuan Proyek
-
-Proyek ini bertujuan untuk:
-
-1. Mengembangkan sistem prediksi harga penutupan saham **Apple Inc. (AAPL)** untuk hari berikutnya (**T+1**) menggunakan algoritma **Random Forest Regressor**.
-2. Menerapkan praktik **Machine Learning Operations (MLOps)** secara end-to-end, mulai dari pengambilan data, preprocessing, pelatihan model, deployment, hingga monitoring.
-3. Mengotomatisasi proses pelatihan ulang (**Continuous Training**) ketika terdapat data baru atau perubahan performa model.
-4. Mengimplementasikan **versioning data dan model** menggunakan DVC dan MLflow sehingga setiap eksperimen dapat dilacak dan direproduksi.
-5. Menyediakan layanan prediksi melalui **REST API** yang dapat diakses secara mudah dan siap digunakan pada lingkungan produksi.
-6. Memantau performa aplikasi dan model secara real-time menggunakan **Prometheus** dan **Grafana** untuk menjaga stabilitas sistem.
-7. Membangun pipeline **CI/CD** menggunakan GitHub Actions agar proses pengembangan, pengujian, dan deployment berjalan otomatis dan konsisten.
-8. Menunjukkan implementasi lengkap konsep MLOps sebagai proyek akademik sekaligus dasar pengembangan sistem prediksi saham yang lebih skalabel dan andal.
-
 ## 🤖 Alasan Menggunakan Random Forest Regressor
 
 Pemilihan algoritma **Random Forest Regressor** pada proyek ini didasarkan pada beberapa pertimbangan berikut:
