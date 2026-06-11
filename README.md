@@ -71,9 +71,7 @@ Proses training dilakukan melalui beberapa tahapan berikut:
 
 ```
 
-Atau jika ingin versi yang lebih singkat untuk presentasi:
-
-```markdown
+==
 ## 🏋️ Cara Kerja Training
 
 - Memuat data hasil preprocessing (19 fitur teknikal).
