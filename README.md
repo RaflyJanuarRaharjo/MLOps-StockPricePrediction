@@ -45,6 +45,15 @@ Berdasarkan hasil eksperimen pada proyek ini, **Random Forest Regressor** mampu 
 
 ---
 
+## 🔄 Cara Kerja Preprocessing
+
+1. Memuat data historis saham AAPL dari Yahoo Finance.
+2. Menghitung fitur teknikal seperti **Moving Average (MA), RSI, MACD, Bollinger Bands, Daily Return,** dan **fitur lag** berdasarkan data harga sebelumnya.
+3. Membuat kolom **Target (T+1)** sebagai harga penutupan hari berikutnya yang akan diprediksi.
+4. Menghapus data yang memiliki nilai kosong (NaN) akibat perhitungan indikator teknikal.
+5. Menyimpan data hasil preprocessing ke `data/processed` untuk digunakan pada proses training model.
+
+   
 # 🏋️ Cara Kerja Training Model
 
 Proses training dilakukan melalui beberapa tahapan berikut:
